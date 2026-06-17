@@ -1055,3 +1055,96 @@ body {
         padding: 20px;
     }
 }
+
+/* Card Action Copy Button */
+.btn-copy-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-copy-action:hover {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    border-color: var(--border-hover);
+}
+
+.btn-copy-action svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Theme Sliding Toggle Switch in Header */
+.theme-switch-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.theme-switch-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    user-select: none;
+}
+
+.theme-switch {
+    display: inline-block;
+    height: 24px;
+    position: relative;
+    width: 44px;
+}
+
+.theme-switch input {
+    display: none;
+}
+
+.slider {
+    background-color: var(--bg-primary);
+    bottom: 0;
+    cursor: pointer;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    transition: var(--transition-normal);
+    border: 1px solid var(--border-color);
+}
+
+.slider:before {
+    background-color: var(--text-secondary);
+    bottom: 3px;
+    content: "";
+    height: 16px;
+    left: 4px;
+    position: absolute;
+    transition: var(--transition-normal);
+    width: 16px;
+}
+
+input:checked + .slider {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+input:checked + .slider:before {
+    transform: translateX(18px);
+    background-color: #ffffff;
+}
+
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}

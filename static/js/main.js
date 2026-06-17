@@ -11,12 +11,14 @@ let state = {
 
 // DOM Elements
 const elements = {
-    themeToggle: document.getElementById('theme-toggle'),
+    themeCheckbox: document.getElementById('theme-checkbox'),
+    themeStatusLabel: document.getElementById('theme-status-label'),
     refreshBtn: document.getElementById('refresh-btn'),
     refreshBtnText: document.getElementById('refresh-btn-text'),
     refreshIcon: document.getElementById('refresh-icon'),
     searchInput: document.getElementById('search-input'),
     searchClear: document.getElementById('search-clear'),
+    exportCsvBtn: document.getElementById('export-csv-btn'),
     categoryList: document.getElementById('category-list'),
     releaseGrid: document.getElementById('release-grid'),
     skeletonLoader: document.getElementById('skeleton-loader'),
@@ -51,13 +53,23 @@ const elements = {
 function initTheme() {
     const savedTheme = localStorage.getItem('theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
+    if (elements.themeCheckbox) {
+        elements.themeCheckbox.checked = (savedTheme === 'dark');
+    }
+    updateThemeLabel(savedTheme);
 }
 
-function toggleTheme() {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+function handleThemeChange(e) {
+    const newTheme = e.target.checked ? 'dark' : 'light';
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
+    updateThemeLabel(newTheme);
+}
+
+function updateThemeLabel(theme) {
+    if (elements.themeStatusLabel) {
+        elements.themeStatusLabel.textContent = theme === 'dark' ? 'Dark Mode' : 'Light Mode';
+    }
 }
 
 // Helpers
@@ -164,6 +176,13 @@ function renderReleases() {
                 ${release.content_html}
             </div>
             <div class="card-actions">
+                <button class="btn-copy-action" data-id="${release.id}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="btn-icon-svg" style="width:14px;height:14px;">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    Copy Text
+                </button>
                 <button class="btn-tweet-action" data-id="${release.id}">
                     <svg viewBox="0 0 24 24" fill="currentColor">
                         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
@@ -172,6 +191,13 @@ function renderReleases() {
                 </button>
             </div>
         `;
+        
+        // Add event listener to the Copy button
+        const copyBtn = card.querySelector('.btn-copy-action');
+        copyBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            copyToClipboard(`${release.date} - ${release.category}: ${release.content_text}`, copyBtn);
+        });
         
         // Add event listener to the Tweet button
         const tweetBtn = card.querySelector('.btn-tweet-action');
@@ -395,9 +421,77 @@ function publishTweet() {
     closeTweetModal();
 }
 
+// Clipboard & Export Helpers
+async function copyToClipboard(text, buttonEl) {
+    try {
+        await navigator.clipboard.writeText(text);
+        const originalHTML = buttonEl.innerHTML;
+        buttonEl.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="btn-icon-svg" style="width:14px;height:14px;color:var(--color-feature)">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Copied!
+        `;
+        buttonEl.style.borderColor = 'var(--color-feature)';
+        buttonEl.style.color = 'var(--color-feature)';
+        setTimeout(() => {
+            buttonEl.innerHTML = originalHTML;
+            buttonEl.style.borderColor = '';
+            buttonEl.style.color = '';
+        }, 2000);
+    } catch (err) {
+        console.error('Failed to copy text: ', err);
+        showBanner('Failed to copy text to clipboard', 'error');
+    }
+}
+
+function exportToCSV() {
+    if (state.filteredReleases.length === 0) {
+        showBanner('No release notes to export', 'error');
+        return;
+    }
+    
+    const headers = ['ID', 'Date', 'Category', 'Link', 'Content'];
+    
+    const escapeCSVField = (text) => {
+        if (!text) return '';
+        // Wrap in quotes and escape internal quotes by doubling them
+        return `"${text.replace(/"/g, '""')}"`;
+    };
+    
+    const csvRows = [headers.join(',')];
+    
+    state.filteredReleases.forEach(item => {
+        const row = [
+            escapeCSVField(item.id),
+            escapeCSVField(item.date),
+            escapeCSVField(item.category),
+            escapeCSVField(item.link),
+            escapeCSVField(item.content_text)
+        ];
+        csvRows.push(row.join(','));
+    });
+    
+    const csvContent = csvRows.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `bigquery_release_notes_${state.currentCategory}_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showBanner('CSV file downloaded successfully!', 'success');
+}
+
 // Event Listeners Registration
 function setupEventListeners() {
-    elements.themeToggle.addEventListener('click', toggleTheme);
+    if (elements.themeCheckbox) {
+        elements.themeCheckbox.addEventListener('change', handleThemeChange);
+    }
+    elements.exportCsvBtn.addEventListener('click', exportToCSV);
     elements.refreshBtn.addEventListener('click', () => fetchReleases(true));
     elements.searchInput.addEventListener('input', handleSearch);
     elements.searchClear.addEventListener('click', clearSearch);

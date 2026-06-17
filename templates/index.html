@@ -25,24 +25,6 @@
                     </svg>
                     <span class="logo-text">BQ Hub</span>
                 </div>
-                <button id="theme-toggle" class="btn-icon" aria-label="Toggle dark/light theme">
-                    <!-- Sun Icon (shown in dark mode) -->
-                    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="5"></circle>
-                        <line x1="12" y1="1" x2="12" y2="3"></line>
-                        <line x1="12" y1="21" x2="12" y2="23"></line>
-                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                        <line x1="1" y1="12" x2="3" y2="12"></line>
-                        <line x1="21" y1="12" x2="23" y2="12"></line>
-                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-                    </svg>
-                    <!-- Moon Icon (shown in light mode) -->
-                    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                    </svg>
-                </button>
             </div>
 
             <!-- Sidebar Content -->
@@ -113,6 +95,15 @@
                     <p class="header-subtitle">Stay updated with the latest changes in Google BigQuery</p>
                 </div>
                 <div class="header-right">
+                    <!-- Theme Toggle Switch -->
+                    <div class="theme-switch-wrapper">
+                        <span id="theme-status-label" class="theme-switch-label">Dark Mode</span>
+                        <label class="theme-switch" for="theme-checkbox">
+                            <input type="checkbox" id="theme-checkbox" checked>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+
                     <!-- Search Input -->
                     <div class="search-box">
                         <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -127,6 +118,14 @@
                             </svg>
                         </button>
                     </div>
+
+                    <!-- Export CSV Button -->
+                    <button id="export-csv-btn" class="btn btn-secondary" aria-label="Export visible notes to CSV">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path>
+                        </svg>
+                        <span>Export CSV</span>
+                    </button>
 
                     <!-- Refresh Button -->
                     <button id="refresh-btn" class="btn btn-primary" aria-label="Refresh release notes">
